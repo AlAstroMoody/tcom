@@ -1,0 +1,61 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    position: relative;
+    font-weight: normal;
+}
+
+body {
+    margin: unset;
+}
+
+p,
+button,
+ul,
+li,
+h1,
+h2,
+h3,
+input,
+textarea {
+    margin: unset;
+    padding: unset;
+}
+
+button,
+input,
+textarea {
+    appearance: unset;
+    outline: unset;
+}
+
+ul,
+li,
+ol {
+    text-indent: 0;
+    list-style: unset;
+}
+
+a,
+button {
+    color: unset;
+    text-decoration: unset;
+    cursor: pointer;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type='number'] {
+    appearance: textfield;
+}
+
+input[type='number']:hover,
+input[type='number']:focus {
+    appearance: number-input;
+}
