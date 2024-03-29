@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Item } from 'entities/item'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, onUnmounted } from 'vue'
 import { vElementSize } from '@vueuse/components'
 const { items, activeItem } = defineProps<{ items: Item[]; activeItem: Item }>()
 import { useMouse, useEventListener } from '@vueuse/core'
@@ -9,8 +9,8 @@ const { x, y, sourceType } = useMouse()
 const COLORS = {
   text: 'white',
   craft: 'green',
+  dark: '#070B24',
 }
-
 
 const zoom = ref(1)
 const canvas = ref<HTMLCanvasElement | null>(null)
@@ -21,23 +21,33 @@ const canvasInit = () => {
     if (ctx.value) {
       canvas.value.width = canvas.value.clientWidth
       canvas.value.height = canvas.value.clientHeight
-      ctx.value.fillStyle = COLORS.text
+      ctx.value.fillStyle = COLORS.dark
       ctx.value.fillRect(0, 0, canvas.value.width, canvas.value.height)
     }
   }
 }
 
-const onResize = () => init()
+const onResize = () => {
+  clear()
+  init()
+}
 
 const elems = ref<{ number: [number, number] }>({})
 
+const clear = () => {
+  if (canvas.value && ctx.value) {
+    ctx.value.clearRect(0, 0, canvas.value.width, canvas.value.height)
+    console.log(canvas.value.width, canvas.value.height)
+  }
+}
+
 const init = () => {
   console.log('init')
+  // clear()
   canvasInit()
-  if (canvas.value && ctx.value && activeItem) {
-    ctx.value.clearRect(0, 0, canvas.value.width, canvas.value.height)
-    elems.value[activeItem.id] = [canvas.value.width, canvas.value.height]
 
+  if (canvas.value && activeItem) {
+    elems.value[activeItem.id] = [canvas.value.width, canvas.value.height]
     const x = canvas.value.width / 2
     const y = 140
     createName(activeItem.id, x - 40, y + 10)
@@ -53,8 +63,9 @@ const getItem = (id: number) => items.find((item) => item.id === id)
 const createName = (id: number, x: number, y: number) => {
   if (canvas.value && ctx.value) {
     const item = getItem(id)
+    console.log(item)
     if (item) {
-      ctx.value.fillStyle = item.craft.length ? COLORS.craft : COLORS.text
+      ctx.value.fillStyle = item.craft?.length ? COLORS.craft : COLORS.text
       ctx.value.font = '16px serif'
       ctx.value.fillText(item.name, x, y)
       ctx.value.stroke()
@@ -78,7 +89,10 @@ const createChild = (
 ) => {
   console.log(gems)
   // gems.forEach((gem) => {})
+  console.log('craft', craft)
+  if (!craft) return
   craft.forEach((elem, elIndex) => {
+    console.log('elem', elem)
     const shift = ~~(elem.items.length / 2) * 140
     animate(0)
     function animate(index: number) {
@@ -88,20 +102,20 @@ const createChild = (
         const randomHeight = Math.floor(Math.random() * 150)
         const randomWidth = Math.floor(Math.random() * 150)
         // console.log(randomHeight)
-        createName(elem.items[index].id, width - randomWidth, height + randomHeight)
+        createName(elem.items[index].id, randomWidth, randomHeight)
         // createCircle(width, height - 10)
         if (elem.items[index + 1]) {
           animate(index + 1)
         }
         const childItem = getItem(elem.items[index].id)
         if (childItem) {
-          // console.log(childItem.name)
-          createChild(
-            childItem.craft,
-            childItem.gems,
-            x - (index % 2 ? -randomWidth : randomWidth),
-            y + randomHeight
-          )
+          // console.log(childItem)
+          // createChild(
+          //   childItem.craft,
+          //   childItem.gems,
+          //   x - (index % 2 ? -randomWidth : randomWidth),
+          //   y + randomHeight
+          // )
         }
       })
     }
@@ -114,12 +128,26 @@ const click = () => {
   console.log(elems.value)
 }
 
-onMounted(() => init())
+onMounted(() => {
+  lockBody(true)
+  init()
+})
+onUnmounted(() => {
+  lockBody(false)
+})
+
+const lockBody = (bool: boolean) => {
+  const body = document.querySelector('body')
+  if (body) {
+    bool ? body.classList.remove('overflow-y-scroll') : body.classList.add('overflow-y-scroll')
+    body.classList.toggle('overflow-hidden')
+  }
+}
 </script>
 <template>
   <canvas
     ref="canvas"
-    class="inset-0 bg-slate-800 absolute z-10 w-dvw h-dvh cursor-pointer"
+    class="inset-0 bg-dark-2 fixed z-20 w-dvw h-dvh cursor-pointer"
     v-element-size="onResize"
     @click="click"
   />

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { store, Item, ItemInfo } from 'entities/item'
-import { BaseModal, ItemButton } from 'shared'
+import { BaseModal, ItemButton, BaseInput, BaseToggle, BaseSelect } from 'shared/ui'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useVirtualList } from '@vueuse/core'
@@ -13,27 +13,41 @@ const items = computed((): Item[] => store.items)
 
 const name = ref('')
 const boss = ref('')
+const isOverwhelmingCrit = ref(false)
+const isSkillCrit = ref(false)
+
+const itemType = ref('Тип предмета')
 
 const filteredItems = computed((): Item[] => {
   let result = items.value
   if (name.value) {
-    result = result.filter((item) => {
-      if (item.name.includes('амень'))
-        console.log(item.name.toLowerCase(), name.value.toLowerCase())
-      return item.name.toLowerCase().includes(name.value.toLowerCase())
-    })
+    result = result.filter((item) => item.name.toLowerCase().includes(name.value.toLowerCase()))
   }
-  // if (boss.value) {
-  //   result = result.filter((item) =>
-  //     item.loot?.toLowerCase().includes(boss.value.toLocaleLowerCase())
-  //   )
-  // }
-  return result
-  // .sort((a, b) => {
-  //   if (a.craft?.length < b.craft?.length) return 1
-  //   if (a.craft?.length > b.craft?.length) return -1
-  //   return 0
-  // })
+  if (boss.value) {
+    result = result.filter((item) =>
+      item.loot?.toLowerCase().includes(boss.value.toLocaleLowerCase())
+    )
+  }
+  if (isOverwhelmingCrit.value) {
+    result = result.filter((item) => item.description.includes('одавляющ'))
+  }
+  if (isSkillCrit.value) {
+    result = result.filter(
+      (item) =>
+        item.description.includes('крит навыкам') || item.description.includes('крита навыкам')
+    )
+  }
+  if (itemType.value && itemType.value !== 'Тип предмета') {
+    if (itemType.value === 'Реликвия') {
+      result = result.filter((item) => item.name.includes(itemType.value))
+    } else result = result.filter((item) => item.description.includes(itemType.value))
+  }
+  return result.sort((a, b) => {
+    // if (a.name.startsWith('II')) return 1
+    if (a.craft?.length < b.craft?.length || a.name.startsWith('II')) return 1
+    if (a.craft?.length > b.craft?.length) return -1
+    return 0
+  })
 })
 
 const { list, containerProps, wrapperProps, scrollTo } = useVirtualList(filteredItems, {
@@ -80,19 +94,33 @@ const changeSearch = (itemName: string, bossName: string) => {
   boss.value = bossName
   scrollTo(0)
 }
+
+const isShowFilter = ref(false)
 </script>
 
 <template>
-  <main class="w-full md:px-8 px-2 flex relative flex-wrap md:flex-col flex-col-reverse" ref="main">
-    <!-- <ItemsGraph v-if="useTree && activeItem" :activeItem="activeItem" :items="items" /> -->
+  <main
+    class="flex relative flex-wrap md:flex-row flex-col-reverse lg:mx-4 gap-2 overflow-x-hidden"
+    ref="main"
+  >
+    <ItemsGraph v-if="useTree && activeItem" :activeItem="activeItem" :items="items" />
     <BaseModal ref="modal" class="md:hidden md:pointer-events-none">
-      <ItemInfo class="w-full" :activeItem="activeItem" v-if="activeItem" @search="changeSearch" />
+      <ItemInfo
+        class="w-11/12"
+        :activeItem="activeItem"
+        v-if="activeItem"
+        @search="changeSearch"
+        @setBoss="boss = $event"
+      />
     </BaseModal>
-    <div class="md:w-1/2 w-full">
+    <div
+      class="lg:w-fit w-full block-gradient lg:px-8 px-4 rounded-3xl md:max-w-[380px]"
+      :key="filteredItems.length"
+    >
+      <div v-if="!filteredItems.length">Предметов не найдено</div>
       <div
         v-bind="containerProps"
-        style="height: calc(100vh - 100px)"
-        class="w-full md:w-96 scrollbar-custom overflow-y-scroll"
+        class="w-full md:w-[340px] scrollbar-custom overflow-y-scroll md:h-[calc(100vh-230px)] h-[calc(100vh-96px)] mb-4"
       >
         <div v-bind="wrapperProps">
           <div
@@ -107,32 +135,80 @@ const changeSearch = (itemName: string, bossName: string) => {
               :title="item.data.name"
               @click="setActiveItem(item.data.id)"
               :active="item.data.id === activeItem?.id"
+              class="w max-w-80"
             />
           </div>
         </div>
       </div>
     </div>
 
-    <div class="w-1/2 max-w-3xl min-w-96 right-8 mx-2 md:fixed">
-      <div class="hidden md:flex gap-2 flex-wrap px-2 py-2">
-        <label class="flex items-center">
-          <div class="w-16">Поиск:</div>
-          <input v-model="name" class="bg-purple-200 border-2 rounded p-2 text-purple-950" />
-        </label>
-
-        <label class="flex items-center">
-          <div class="w-16">Босс:</div>
-          <input v-model="boss" class="bg-purple-200 border-2 rounded p-2 text-purple-950" />
-        </label>
-      </div>
+    <div class="w-1/2 lg:min-w-96 lg:mx-2 mb-4" v-if="activeItem">
       <ItemInfo
         :activeItem="activeItem"
-        v-if="activeItem"
         @search="changeSearch"
+        @setBoss="boss = $event"
         v-model:name="name"
         v-model:boss="boss"
-        class="md:block hidden"
+        class="md:block hidden block-gradient md:p-8 px-2 rounded-3xl"
       />
+    </div>
+
+    <div
+      class="md:block dark:bg-dark-2 bg-light-2 mb-5 rounded-3xl w-fit md:p-8 p-6 ml-auto h-fit fixed top-36 right-0 transition-all border-2 border-light-3 z-10"
+      :class="{ 'translate-x-full mr-4': !isShowFilter }"
+    >
+      <button
+        class="absolute top-0 bottom-0 w-10"
+        @click="isShowFilter = !isShowFilter"
+        :class="isShowFilter ? '-left-3' : '-left-[29px]'"
+      >
+        <svg
+          version="1.1"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 129 129"
+          class="fill-light-3"
+          :class="isShowFilter ? '' : 'rotate-180'"
+        >
+          <g>
+            <path
+              d="m40.4,121.3c-0.8,0.8-1.8,1.2-2.9,1.2s-2.1-0.4-2.9-1.2c-1.6-1.6-1.6-4.2 0-5.8l51-51-51-51c-1.6-1.6-1.6-4.2 0-5.8 1.6-1.6 4.2-1.6 5.8,0l53.9,53.9c1.6,1.6 1.6,4.2 0,5.8l-53.9,53.9z"
+            />
+          </g>
+        </svg>
+      </button>
+      <div class="flex flex-wrap mb-2">
+        <BaseInput
+          v-model:value="name"
+          placeholder="Поиск по названию"
+          position="left"
+          class="md:max-w-40 max-w-36"
+        />
+        <BaseInput
+          v-model:value="boss"
+          placeholder="Поиск по боссу"
+          position="right"
+          class="md:max-w-40 max-w-36"
+        />
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <BaseToggle v-model="isOverwhelmingCrit" label="Подавляющий крит" />
+        <BaseToggle v-model="isSkillCrit" label="Крит навыками" />
+        <BaseSelect
+          class="w-fit"
+          v-model="itemType"
+          :list="[
+            'Граальный артефакт',
+            'Реликвия',
+            'Сокровище',
+            'Bloody Item',
+            'Black Item',
+            'Aqua',
+            'Жертвенный',
+            'Материал',
+          ]"
+        />
+      </div>
     </div>
   </main>
 </template>

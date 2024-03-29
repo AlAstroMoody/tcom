@@ -26,7 +26,8 @@ textarea {
 
 button,
 input,
-textarea {
+textarea,
+select {
     appearance: unset;
     outline: unset;
 }
@@ -39,7 +40,8 @@ ol {
 }
 
 a,
-button {
+button,
+select {
     color: unset;
     text-decoration: unset;
     cursor: pointer;
@@ -49,13 +51,4 @@ input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
-}
-
-input[type='number'] {
-    appearance: textfield;
-}
-
-input[type='number']:hover,
-input[type='number']:focus {
-    appearance: number-input;
 }

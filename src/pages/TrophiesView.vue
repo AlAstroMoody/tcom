@@ -153,9 +153,9 @@ const trophies = [
     <div
       v-for="(trophy, index) of trophies"
       :key="index"
-      class="bg-gray-700 p-2 rounded w-full md:max-w-[32%] shadow-base hover:shadow-full"
+      class="bg-dark-300 p-2 rounded w-full md:max-w-[32%]"
     >
-      <span class="text-xl text-green-500 mb-2 font-semibold">{{ trophy.name }}</span>
+      <span class="text-xl text-light-1 mb-2 font-semibold">{{ trophy.name }}</span>
       <div class="px-2">
         <div v-if="trophy.active">
           <span class="text-lg">Активно: </span>

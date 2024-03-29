@@ -2,8 +2,40 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+	@font-face {
+		font-family: 'Warcraft';
+		font-style: normal;
+		font-weight: 400;
+		font-display: swap;
+		src: url(/fonts/Warcraft.woff2) format('woff2');
+	}
+}
+
 @layer components {
 	.scrollbar-custom {
-		@apply scrollbar-thin scrollbar-track-gray-600 scrollbar-thumb-gray-800 scrollbar-track-rounded-full;
+		@apply scrollbar-thin dark:scrollbar-track-dark-1 scrollbar-track-rounded-full scrollbar-track-light-1 scrollbar-thumb-dark-3;
+	}
+
+	body {
+		@apply dark:bg-dark-1 bg-light-1 text-white
+	}
+
+	.dark-gradient {
+		background: linear-gradient(90deg,
+				#081041 0%,
+				#070b24 43.77%,
+				rgba(7, 11, 36, 0.95) 49.4%,
+				rgba(7, 11, 36, 0.6) 65.24%,
+				rgba(7, 11, 36, 0) 83.18%);
+	}
+
+	.light-gradient {
+		background: linear-gradient(90deg,
+				#081041 0%,
+				#070b24 43.77%,
+				rgba(7, 11, 36, 0.95) 49.4%,
+				rgba(7, 11, 36, 0.6) 65.24%,
+				rgba(7, 11, 36, 0) 83.18%);
 	}
 }

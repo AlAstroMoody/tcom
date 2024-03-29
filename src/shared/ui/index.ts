@@ -1,3 +1,7 @@
 export { default as BaseButton } from './BaseButton.vue'
 export { default as ItemButton } from './ItemButton.vue'
 export { default as BaseModal } from './BaseModal.vue'
+export { default as ThemeButton } from './ThemeButton.vue'
+export { default as BaseInput } from './BaseInput.vue'
+export { default as BaseToggle } from './BaseToggle.vue'
+export { default as BaseSelect } from './BaseSelect.vue'

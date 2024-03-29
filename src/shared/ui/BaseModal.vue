@@ -12,7 +12,7 @@ const close = () => {
 defineExpose({ open, close })
 </script>
 <template>
-  <dialog ref="dialog" class="bg-gray-700 w-full h-full mx-auto">
+  <dialog ref="dialog" class="dark:bg-dark-2 bg-light-2 w-full mx-auto lg:h-auto h-full">
     <header>
       <button class="fixed top-4 right-4 z-10" @click="close">
         <svg width="24" height="24" viewBox="0 0 24 24">
@@ -32,8 +32,8 @@ dialog:not([open]) {
 }
 
 dialog {
-  max-block-size: min(98vh, 100%);
-  max-block-size: min(98dvb, 100%);
+  max-block-size: min(100vh, 100%);
+  max-block-size: min(100dvb, 100%);
   overflow: hidden;
   display: grid;
   align-content: start;
