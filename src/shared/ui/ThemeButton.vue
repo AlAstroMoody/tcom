@@ -1,24 +1,26 @@
 <script setup lang="ts">
-import { useDark, useToggle } from '@vueuse/core'
+import { ref } from 'vue'
 
-const isDark = useDark()
-const toggleDark = useToggle(isDark)
+const isDark = ref(true)
+const toggleDark = () => {
+  isDark.value = !isDark.value
+  document.querySelector('html')?.classList.toggle('dark')
+}
 </script>
 <template>
-  <div class="flex gap-1 rounded-2xl dark:bg-dark-3 bg-white text-light-3 p-1">
+  <div class="flex gap-1 rounded-2xl dark:bg-dark-3 bg-white text-light-3 p-1 relative">
     <button
-      class="px-4 py-2 rounded-xl text-sm"
-      :class="isDark ? 'text-light-3' : 'text-white bg-light-3 '"
+      :key="btn"
+      class="px-4 py-2 rounded-xl text-sm transition-all relative z-10"
+      :class="{ 'text-white': isDark || btn === 'Light' }"
       @click="toggleDark()"
+      v-for="btn in ['Light', 'Dark']"
     >
-      Light
+      {{ btn }}
     </button>
-    <button
-      class="px-4 py-2 rounded-xl text-sm"
-      :class="isDark ? 'text-white bg-light-3 ' : 'text-light-3'"
-      @click="toggleDark()"
-    >
-      Black
-    </button>
+    <div
+      class="bg-light-3 w-16 absolute h-9 rounded-xl z-1 transition-all duration-500 translate-x-0"
+      :class="isDark ? 'translate-x-16' : ''"
+    />
   </div>
 </template>

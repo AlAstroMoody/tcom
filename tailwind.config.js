@@ -23,6 +23,10 @@ export default {
     extend: {
       spacing: {
         2.5: '0.625rem',
+        5.25: '84px',
+      },
+      dropShadow: {
+        logo: '1px 4px 6px rgba(0, 0, 0, 0.94)',
       },
     },
     // extend: {

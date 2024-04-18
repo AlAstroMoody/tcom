@@ -15,8 +15,25 @@ const name = ref('')
 const boss = ref('')
 const isOverwhelmingCrit = ref(false)
 const isSkillCrit = ref(false)
+const isEvadeItem = ref(false)
+const isMagicDefenceItem = ref(false)
 
 const itemType = ref('Тип предмета')
+
+const itemExtract = ref('Экстракты')
+const extracts = [
+  {
+    name: 'Все экстракты',
+    value: 'ко всем Экcтpaктам',
+    alternatives: ['ко всем Экстрактам', 'ко всем Экстрактам'],
+  },
+  { name: 'Экстракт Защиты', value: 'Экстракту Защиты', alternatives: [] },
+  { name: 'Экстракт Магии', value: 'Экстракту Магии', alternatives: [] },
+  { name: 'Экстракт Жизни', value: 'Экстракту Жизни', alternatives: [] },
+  { name: 'Экстракт Разрушения', value: 'Экстракту Разрушения', alternatives: [] },
+  { name: 'Экстракт Силы', value: 'Экстракту Силы', alternatives: [] },
+  { name: 'Экстракт Энергии', value: 'Экстракту Энергии', alternatives: ['Экстракту Помощи'] },
+]
 
 const filteredItems = computed((): Item[] => {
   let result = items.value
@@ -31,6 +48,12 @@ const filteredItems = computed((): Item[] => {
   if (isOverwhelmingCrit.value) {
     result = result.filter((item) => item.description.includes('одавляющ'))
   }
+  if (isEvadeItem.value) {
+    result = result.filter((item) => item.description.includes('клонени'))
+  }
+  if (isMagicDefenceItem.value) {
+    result = result.filter((item) => item.description.includes('от магии'))
+  }
   if (isSkillCrit.value) {
     result = result.filter(
       (item) =>
@@ -40,14 +63,25 @@ const filteredItems = computed((): Item[] => {
   if (itemType.value && itemType.value !== 'Тип предмета') {
     if (itemType.value === 'Реликвия') {
       result = result.filter((item) => item.name.includes(itemType.value))
-    } else result = result.filter((item) => item.description.includes(itemType.value))
+    } else result = result.filter((item) => item.category === itemType.value)
   }
-  return result.sort((a, b) => {
-    // if (a.name.startsWith('II')) return 1
-    if (a.craft?.length < b.craft?.length || a.name.startsWith('II')) return 1
-    if (a.craft?.length > b.craft?.length) return -1
-    return 0
-  })
+
+  if (itemExtract.value && itemExtract.value !== 'Экстракты') {
+    const activeExtract = extracts.find(
+      (e) => e.name.toLowerCase() === itemExtract.value.toLowerCase()
+    )
+
+    if (activeExtract)
+      result = result.filter((item) => {
+        const desc = item.description.toLowerCase().replaceAll(/ {2,}/g, ' ')
+        return (
+          desc.includes(activeExtract.value.toLowerCase()) ||
+          desc.includes(activeExtract.alternatives[0]?.toLowerCase())
+        )
+      })
+  }
+
+  return result.sort((a, b) => a.name.localeCompare(b.name))
 })
 
 const { list, containerProps, wrapperProps, scrollTo } = useVirtualList(filteredItems, {
@@ -61,7 +95,6 @@ onMounted(async () => {
 })
 watch(items, () => {
   if (route.query.item) setActiveItem(+route.query.item)
-  console.log(items.value.map((i) => i.id))
 })
 
 const main = ref<HTMLElement>()
@@ -87,7 +120,6 @@ const showTree = (id: number) => {
 }
 
 const modal = ref<InstanceType<typeof BaseModal> | null>(null)
-const itemsList = ref<HTMLElement>()
 
 const changeSearch = (itemName: string, bossName: string) => {
   name.value = itemName
@@ -114,13 +146,13 @@ const isShowFilter = ref(false)
       />
     </BaseModal>
     <div
-      class="lg:w-fit w-full block-gradient lg:px-8 px-4 rounded-3xl md:max-w-[380px]"
+      class="lg:w-fit w-full block-gradient px-4 rounded-3xl md:max-w-[380px]"
       :key="filteredItems.length"
     >
       <div v-if="!filteredItems.length">Предметов не найдено</div>
       <div
         v-bind="containerProps"
-        class="w-full md:w-[340px] scrollbar-custom overflow-y-scroll md:h-[calc(100vh-230px)] h-[calc(100vh-96px)] mb-4"
+        class="w-full md:w-[340px] scrollbar-custom overflow-y-scroll md:h-[calc(100vh-116px)] h-[calc(100vh-96px)] mb-4"
       >
         <div v-bind="wrapperProps">
           <div
@@ -194,6 +226,8 @@ const isShowFilter = ref(false)
       <div class="flex flex-col gap-2">
         <BaseToggle v-model="isOverwhelmingCrit" label="Подавляющий крит" />
         <BaseToggle v-model="isSkillCrit" label="Крит навыками" />
+        <BaseToggle v-model="isEvadeItem" label="Уклонение" />
+        <BaseToggle v-model="isMagicDefenceItem" label="Защита от магии" />
         <BaseSelect
           class="w-fit"
           v-model="itemType"
@@ -208,6 +242,7 @@ const isShowFilter = ref(false)
             'Материал',
           ]"
         />
+        <BaseSelect class="w-fit" v-model="itemExtract" :list="extracts.map((e) => e.name)" />
       </div>
     </div>
   </main>

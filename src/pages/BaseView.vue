@@ -33,52 +33,31 @@ const burgerValue = ref(false)
 </script>
 <template>
   <div class="w-full">
-    <header
-      class="md:mb-6 md:mt-10 my-2 bg-light-1 dark:bg-dark-2 w-fit py-5 px-3 md:px-7 mx-auto border-light-4 dark:border-dark-3 border-2 rounded-3xl sticky top-3 z-10 flex gap-3"
-    >
-      <a class="relative w-32" ref="logo" href="https://discord.gg/KbyW6hsaTv" target="_blank">
-        <img
-          src="/images/logo.png"
-          class="transition-all absolute duration-500"
-          :class="{ '[transform:rotateY(90deg)]': isRotate, 'delay-200': !isHoveredLogo }"
-        />
+    <header class="flex mb-2 relative h-5.25">
+      <div
+        class="bg-gradient-to-r dark:from-dark-1 dark:to-dark-2 from-light-1 to-light-2 w-fit py-5 px-3 md:px-7 mr-auto border-light-4 dark:border-dark-3 border-none border-t-0 border-l-0 rounded-br-3xl fixed top-0 z-10 flex gap-3 h-5.25"
+      >
+        <a class="relative w-32" ref="logo" href="https://discord.gg/KbyW6hsaTv" target="_blank">
+          <img
+            src="/images/logo.png"
+            class="transition-all absolute duration-500"
+            :class="{ '[transform:rotateY(90deg)]': isRotate, 'delay-200': !isHoveredLogo }"
+          />
 
-        <span
-          class="font-warcraft text-6xl text-warcraft drop-shadow-md transition-all absolute -m-1 duration-500"
-          :class="{ '[transform:rotateY(-90deg)]': !isRotate, 'delay-200': isHoveredLogo }"
-        >
-          TCOM
-        </span>
-      </a>
-
-      <div class="lg:flex hidden gap-2">
-        <RouterLink
-          :to="link.href"
-          :class="{ 'text-dark-2 dark:text-light-2': route.path === link.href }"
-          v-for="link of links"
-          :key="link.href"
-          class="py-2 text-lg transition-all hover:text-dark-1 dark:text-white hover:dark:text-light-3 hover:scale-110"
-        >
-          {{ link.title }}
-        </RouterLink>
+          <span
+            class="font-warcraft text-warcraft transition-all absolute -mt-3 duration-500 drop-shadow-logo"
+            :class="{ '[transform:rotateY(-90deg)]': !isRotate, 'delay-200': isHoveredLogo }"
+          >
+            <p class="text-5xl h-9">TCOM</p>
+            <p class="text-3xl -mt-1">1.26 final</p>
+          </span>
+        </a>
       </div>
-      <ThemeButton />
-      <!-- <div class="bg-dark-3 h-10 w-10 lg:hidden block"></div> -->
-      <div class="menu md:hidden">
-        <input type="checkbox" class="burger-checkbox" id="burger-checkbox" v-model="burgerValue" />
-        <label
-          for="burger-checkbox"
-          class="burger dark:after:bg-light-1 dark:before:bg-light-1 after:bg-dark-3 before:bg-dark-3 mt-2"
-        />
-        <ul class="menu-list dark:bg-dark-3 bg-light-2 rounded-bl-xl" ref="burgerMenu">
-          <div class="mt-6 text-dark-3 dark:text-light-1 flex gap-2 flex-col px-4">
-            <li v-for="link in links" @click="burgerValue = false">
-              <router-link :to="link.href" class="menu-item block">
-                {{ link.title }}
-              </router-link>
-            </li>
-          </div>
-        </ul>
+
+      <div
+        class="bg-gradient-to-r dark:from-dark-2 dark:to-dark-1 from-light-2 to-light-1 w-fit py-5 px-3 md:px-7 ml-auto border-light-4 dark:border-dark-3 border-none border-t-0 border-r-0 rounded-bl-3xl fixed top-0 right-0 z-10 flex gap-3"
+      >
+        <ThemeButton />
       </div>
     </header>
     <RouterView class="dark:text-light-1 text-dark-1" />
